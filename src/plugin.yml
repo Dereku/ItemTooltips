@@ -1,0 +1,5 @@
+name: ItemTooltips
+version: 1.1
+author: Dereku
+email: [dereku@default.im, dereku@without.club]
+main: club.without.dereku.itemtooltips.ItemTooltips
