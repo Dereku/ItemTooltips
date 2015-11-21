@@ -46,12 +46,10 @@ public class Listeners implements Listener {
         if (event.isCancelled()) {
             return;
         }
-
         Item item = event.getEntity();
         if (!this.plugin.worlds.contains(item.getLocation().getWorld().getName())) {
             return;
         }
-        
         ItemMeta im = item.getItemStack().getItemMeta();
         item.setCustomName(im.hasDisplayName() ? im.getDisplayName() : this.plugin.getName(item));
         item.setCustomNameVisible(true);

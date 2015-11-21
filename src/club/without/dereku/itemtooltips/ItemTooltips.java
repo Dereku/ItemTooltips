@@ -32,7 +32,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 import net.minecraft.server.v1_8_R3.ItemStack;
-import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -56,13 +55,11 @@ public class ItemTooltips extends JavaPlugin {
     public void onEnable() {
         this.saveDefaultConfig();
         this.language = this.getConfig().getString("lang", "en_US");
-
         if (!this.language.equals("en_US")) {
             this.downloadAndApplyLanguage(this.language);
         }
 
         this.worlds = this.getConfig().getStringList("worlds");
-
         if (worlds.isEmpty()) {
             for (World world : this.getServer().getWorlds()) {
                 worlds.add(world.getName());
@@ -70,14 +67,12 @@ public class ItemTooltips extends JavaPlugin {
             this.getConfig().set("worlds", this.worlds);
             this.saveConfig();
         }
-
         this.getServer().getPluginManager().registerEvents(new Listeners(this), this);
         this.getLogger().info("Enabled.");
     }
 
     private void downloadAndApplyLanguage(String lang) {
         File file = new File(this.getDataFolder().toString() + File.separator + "lang", lang + ".lang");
-
         if (!file.exists()) {
             file.mkdir();
             try {
@@ -110,7 +105,7 @@ public class ItemTooltips extends JavaPlugin {
             return nms.getName();
         }
         String out;
-        //Banners why you are written so badly?
+        //Banners, why you are written so badly?
         if (item.getItemStack().getType().equals(Material.BANNER)) {
             BannerMeta bm = (BannerMeta) item.getItemStack().getItemMeta();
             out = item.getName().replace("tile.", "") + "." + bm.getBaseColor().toString().toLowerCase().replace("light_blue", "lightBlue") + ".name";
