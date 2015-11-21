@@ -53,7 +53,7 @@ public class Listeners implements Listener {
         }
         
         ItemMeta im = item.getItemStack().getItemMeta();
-        item.setCustomName(im.hasDisplayName() ? im.getDisplayName() : this.plugin.getName(item.getName()));
+        item.setCustomName(im.hasDisplayName() ? im.getDisplayName() : this.plugin.getName(item));
         item.setCustomNameVisible(true);
     }
 }

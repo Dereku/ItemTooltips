@@ -31,8 +31,14 @@ import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
+import net.minecraft.server.v1_8_R3.ItemStack;
+import org.bukkit.DyeColor;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
+import org.bukkit.entity.Item;
+import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
@@ -51,14 +57,12 @@ public class ItemTooltips extends JavaPlugin {
         this.saveDefaultConfig();
         this.language = this.getConfig().getString("lang", "en_US");
 
-        if (this.language.equals("en_US")) {
-            this.loadDefaultLanguage();
-        } else {
+        if (!this.language.equals("en_US")) {
             this.downloadAndApplyLanguage(this.language);
         }
-        
+
         this.worlds = this.getConfig().getStringList("worlds");
-        
+
         if (worlds.isEmpty()) {
             for (World world : this.getServer().getWorlds()) {
                 worlds.add(world.getName());
@@ -73,7 +77,7 @@ public class ItemTooltips extends JavaPlugin {
 
     private void downloadAndApplyLanguage(String lang) {
         File file = new File(this.getDataFolder().toString() + File.separator + "lang", lang + ".lang");
-        
+
         if (!file.exists()) {
             file.mkdir();
             try {
@@ -81,12 +85,11 @@ public class ItemTooltips extends JavaPlugin {
                 this.rd.downloadResource(language, file);
             } catch (IOException | InvalidConfigurationException ex) {
                 this.getLogger().log(Level.WARNING, "Failed to download " + file.getName(), ex);
-                this.getLogger().log(Level.WARNING, "Falling back to en_US language.");
-                this.loadDefaultLanguage();
+                this.getLogger().log(Level.WARNING, "Using en_US language.");
+                this.keys.clear();
                 return;
             }
         }
-        
         this.loadLanguage(file);
     }
 
@@ -96,23 +99,24 @@ public class ItemTooltips extends JavaPlugin {
             this.keys.load(is);
         } catch (IOException ex) {
             this.getLogger().log(Level.WARNING, "Failed to load " + file.getName(), ex);
-            this.getLogger().log(Level.WARNING, "Falling back to en_US language.");
-            this.loadDefaultLanguage();
+            this.getLogger().log(Level.WARNING, "Using en_US language.");
+            this.keys.clear();
         }
     }
 
-    private void loadDefaultLanguage() {
-        try {
-            this.keys.load(this.getResource("en_US.lang"));
-        } catch (IOException ex) {
-            this.getLogger().log(Level.WARNING, "Failed to load en_US.lang", ex);
-            this.getLogger().log(Level.WARNING, "Due to the failures to load the language, the plugin will be disabled.", ex);
-            this.setEnabled(false);
+    public String getName(Item item) {
+        ItemStack nms = CraftItemStack.asNMSCopy(item.getItemStack());
+        if (this.keys.isEmpty()) {
+            return nms.getName();
         }
-    }
-    
-    public String getName(String key) {
-        String out = key.substring(5) + ".name";
+        String out;
+        //Banners why you are written so badly?
+        if (item.getItemStack().getType().equals(Material.BANNER)) {
+            BannerMeta bm = (BannerMeta) item.getItemStack().getItemMeta();
+            out = item.getName().replace("tile.", "") + "." + bm.getBaseColor().toString().toLowerCase().replace("light_blue", "lightBlue") + ".name";
+        } else {
+            out = nms.a() + ".name";
+        }
         return this.keys.getProperty(out, out);
     }
 }
