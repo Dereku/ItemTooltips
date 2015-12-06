@@ -1,2 +1,5 @@
 lang: en_US
+format:
+    withAmount: "%name% &7[x%amount%]"
+    whithoutAmount: "%name%"
 worlds: {}

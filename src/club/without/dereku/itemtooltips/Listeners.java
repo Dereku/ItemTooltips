@@ -23,10 +23,14 @@
  */
 package club.without.dereku.itemtooltips;
 
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Item;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.ItemMergeEvent;
 import org.bukkit.event.entity.ItemSpawnEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 /**
@@ -46,12 +50,38 @@ public class Listeners implements Listener {
         if (event.isCancelled()) {
             return;
         }
-        Item item = event.getEntity();
+        this.setName(event.getEntity(), event.getEntity().getItemStack());
+    }
+    
+    @EventHandler
+    public void onItemMergeEvent(ItemMergeEvent event) {
+        if (event.isCancelled()) {
+            return;
+        }
+        ItemStack is = event.getEntity().getItemStack().clone();
+        is.setAmount(is.getAmount() + event.getTarget().getItemStack().getAmount());
+        this.setName(event.getTarget(), is);
+    }
+    
+    private void setName(Item item, ItemStack itemStack) {
         if (!this.plugin.worlds.contains(item.getLocation().getWorld().getName())) {
             return;
         }
         ItemMeta im = item.getItemStack().getItemMeta();
-        item.setCustomName(im.hasDisplayName() ? im.getDisplayName() : this.plugin.getName(item));
+        String name;
+        if (itemStack.getAmount() > 1) {
+            name = this.plugin.getConfig().getString("format.withAmount", "%name% x%amount%");
+        } else {
+            name = this.plugin.getConfig().getString("format.withoutAmount", "%name%");
+        }
+        item.setCustomName(
+                ChatColor.translateAlternateColorCodes('&',
+                        name
+                        .replace("%name%",
+                                im.hasDisplayName() ? im.getDisplayName() : this.plugin.getName(item))
+                        .replace("%amount%",
+                                Integer.toString(itemStack.getAmount())))
+        );
         item.setCustomNameVisible(true);
     }
 }
