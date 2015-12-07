@@ -28,7 +28,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.logging.Level;
-import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FileUtilsSmall;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -62,7 +62,7 @@ public class ResourceDownloader {
             return;
         }
         this.plugin.getLogger().log(Level.INFO, "Downloading {0}.lang (hash: {1})", new Object[]{name, hash});
-        FileUtils.copyURLToFile(new URL(ASSETS_URL + this.createPathFromHash(hash)), destination);
+        FileUtilsSmall.copyURLToFile(new URL(ASSETS_URL + this.createPathFromHash(hash)), destination);
     }
 
     /**
