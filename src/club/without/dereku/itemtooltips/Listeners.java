@@ -23,7 +23,6 @@
  */
 package club.without.dereku.itemtooltips;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Item;
 import org.bukkit.event.EventHandler;
@@ -78,7 +77,7 @@ public class Listeners implements Listener {
                 ChatColor.translateAlternateColorCodes('&',
                         name
                         .replace("%name%",
-                                im.hasDisplayName() ? im.getDisplayName() : this.plugin.getName(item))
+                                im.hasDisplayName() ? im.getDisplayName() : this.plugin.getImpl().getName(item))
                         .replace("%amount%",
                                 Integer.toString(itemStack.getAmount())))
         );

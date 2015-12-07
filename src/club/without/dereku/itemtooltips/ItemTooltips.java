@@ -23,21 +23,17 @@
  */
 package club.without.dereku.itemtooltips;
 
+import club.without.dereku.itemtooltips.implementations.Implementation;
+import club.without.dereku.itemtooltips.implementations.v1_8_R3;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.List;
-import java.util.Properties;
 import java.util.logging.Level;
-import net.minecraft.server.v1_8_R3.ItemStack;
-import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.configuration.InvalidConfigurationException;
-import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
-import org.bukkit.entity.Item;
-import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
@@ -46,17 +42,28 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class ItemTooltips extends JavaPlugin {
 
-    private final Properties keys = new Properties();
     private String language;
+    private String version;
     private ResourceDownloader rd;
+    private Implementation impl;
     public List<String> worlds;
 
     @Override
     public void onEnable() {
         this.saveDefaultConfig();
         this.language = this.getConfig().getString("lang", "en_US");
+        
+        if (this.getServer().getBukkitVersion().startsWith("1.8.8")) {
+            this.impl = new v1_8_R3();
+            this.version = "1.8";
+        } else {
+            this.getLogger().info("Not implemented yet.");
+            this.getPluginLoader().disablePlugin(this);
+            return;
+        }
+        
         if (!this.language.equals("en_US")) {
-            this.downloadAndApplyLanguage(this.language);
+            this.downloadAndApplyLanguage(this.version, this.language);
         }
 
         this.worlds = this.getConfig().getStringList("worlds");
@@ -71,47 +78,35 @@ public class ItemTooltips extends JavaPlugin {
         this.getLogger().info("Enabled.");
     }
 
-    private void downloadAndApplyLanguage(String lang) {
-        File file = new File(this.getDataFolder().toString() + File.separator + "lang", lang + ".lang");
+    public Implementation getImpl() {
+        return this.impl;
+    }
+
+    public void downloadAndApplyLanguage(String version, String lang) {
+        File file = new File(this.getDataFolder().toString() + File.separator + "lang" + File.separator + version, lang + ".lang");
         if (!file.exists()) {
             file.mkdir();
             try {
                 this.rd = new ResourceDownloader(this);
-                this.rd.downloadResource(language, file);
-            } catch (IOException | InvalidConfigurationException ex) {
+                this.rd.downloadResource(version + "." + lang, file);
+            } catch (IOException | InvalidConfigurationException | IllegalArgumentException ex) {
                 this.getLogger().log(Level.WARNING, "Failed to download " + file.getName(), ex);
                 this.getLogger().log(Level.WARNING, "Using en_US language.");
-                this.keys.clear();
+                this.impl.keys.clear();
                 return;
             }
         }
         this.loadLanguage(file);
     }
 
-    private void loadLanguage(File file) {
+    public void loadLanguage(File file) {
         Charset charset = Charset.forName("UTF-8");
         try (InputStreamReader is = new InputStreamReader(new FileInputStream(file), charset)) {
-            this.keys.load(is);
+            this.impl.keys.load(is);
         } catch (IOException ex) {
             this.getLogger().log(Level.WARNING, "Failed to load " + file.getName(), ex);
             this.getLogger().log(Level.WARNING, "Using en_US language.");
-            this.keys.clear();
+            this.impl.keys.clear();
         }
-    }
-
-    public String getName(Item item) {
-        ItemStack nms = CraftItemStack.asNMSCopy(item.getItemStack());
-        if (this.keys.isEmpty()) {
-            return nms.getName();
-        }
-        String out;
-        //Banners, why you are written so badly?
-        if (item.getItemStack().getType().equals(Material.BANNER)) {
-            BannerMeta bm = (BannerMeta) item.getItemStack().getItemMeta();
-            out = item.getName().replace("tile.", "") + "." + bm.getBaseColor().toString().toLowerCase().replace("light_blue", "lightBlue") + ".name";
-        } else {
-            out = nms.a() + ".name";
-        }
-        return this.keys.getProperty(out, out);
     }
 }
