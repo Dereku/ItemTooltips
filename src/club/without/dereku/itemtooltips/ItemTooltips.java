@@ -50,7 +50,6 @@ public class ItemTooltips extends JavaPlugin {
     public void onEnable() {
         this.saveDefaultConfig();
         this.language = this.getConfig().getString("lang", "en_US");
-        
         if (this.getServer().getBukkitVersion().startsWith("1.8.8")) {
             this.impl = new v1_8_R3();
         } else if (this.getServer().getBukkitVersion().startsWith("1.9-R0.1")) {
