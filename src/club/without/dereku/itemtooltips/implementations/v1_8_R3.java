@@ -34,6 +34,11 @@ import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
  * @author Dereku
  */
 public class v1_8_R3 extends Implementation {
+    
+    @Override
+    public String getVersion() {
+        return "1.8";
+    }
 
     @Override
     public String getName(Item item) {

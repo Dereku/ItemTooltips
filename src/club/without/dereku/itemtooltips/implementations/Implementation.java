@@ -35,4 +35,6 @@ public abstract class Implementation {
     public final Properties keys = new Properties();
     
     public abstract String getName(Item item);
+    
+    public abstract String getVersion();
 }

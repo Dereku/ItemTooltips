@@ -23,8 +23,7 @@
  */
 package club.without.dereku.itemtooltips;
 
-import club.without.dereku.itemtooltips.implementations.Implementation;
-import club.without.dereku.itemtooltips.implementations.v1_8_R3;
+import club.without.dereku.itemtooltips.implementations.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -43,7 +42,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class ItemTooltips extends JavaPlugin {
 
     private String language;
-    private String version;
     private ResourceDownloader rd;
     private Implementation impl;
     public List<String> worlds;
@@ -52,10 +50,11 @@ public class ItemTooltips extends JavaPlugin {
     public void onEnable() {
         this.saveDefaultConfig();
         this.language = this.getConfig().getString("lang", "en_US");
-        
+        this.getLogger().info(this.getServer().getBukkitVersion());
         if (this.getServer().getBukkitVersion().startsWith("1.8.8")) {
             this.impl = new v1_8_R3();
-            this.version = "1.8";
+        } else if (this.getServer().getBukkitVersion().startsWith("1.9-R0.1")) {
+            this.impl = new v1_9_R1();
         } else {
             this.getLogger().info("Not implemented yet.");
             this.getPluginLoader().disablePlugin(this);
@@ -63,7 +62,7 @@ public class ItemTooltips extends JavaPlugin {
         }
         
         if (!this.language.equals("en_US")) {
-            this.downloadAndApplyLanguage(this.version, this.language);
+            this.downloadAndApplyLanguage(this.impl.getVersion(), this.language);
         }
 
         this.worlds = this.getConfig().getStringList("worlds");

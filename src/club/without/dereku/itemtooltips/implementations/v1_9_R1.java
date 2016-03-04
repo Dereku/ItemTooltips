@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2015 Dereku.
+ * Copyright 2016 Dereku.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,17 +23,38 @@
  */
 package club.without.dereku.itemtooltips.implementations;
 
+import net.minecraft.server.v1_9_R1.ItemStack;
+import org.bukkit.Material;
+import org.bukkit.craftbukkit.v1_9_R1.inventory.CraftItemStack;
 import org.bukkit.entity.Item;
+import org.bukkit.inventory.meta.BannerMeta;
 
 /**
  *
  * @author Dereku
  */
-public class v1_7_R4 extends Implementation {
+public class v1_9_R1 extends Implementation{
 
     @Override
     public String getName(Item item) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        ItemStack nms = CraftItemStack.asNMSCopy(item.getItemStack());
+        if (this.keys.isEmpty()) {
+            return nms.getName();
+        }
+        String out;
+        //Banners, why you are written so badly?
+        if (item.getItemStack().getType().equals(Material.BANNER)) {
+            BannerMeta bm = (BannerMeta) item.getItemStack().getItemMeta();
+            out = item.getName().replace("tile.", "") + "." + bm.getBaseColor().toString().toLowerCase().replace("light_blue", "lightBlue") + ".name";
+        } else {
+            out = nms.a() + ".name";
+        }
+        return this.keys.getProperty(out, out);
+    }
+
+    @Override
+    public String getVersion() {
+        return "1.9";
     }
     
 }
