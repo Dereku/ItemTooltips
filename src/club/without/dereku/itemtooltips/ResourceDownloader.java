@@ -25,7 +25,6 @@ package club.without.dereku.itemtooltips;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.IllegalArgumentException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.logging.Level;
@@ -56,9 +55,9 @@ public class ResourceDownloader {
      * @throws MalformedURLException
      * @throws IOException 
      */
-    public void downloadResource(String name, File destination) throws MalformedURLException, IOException {
+    public void downloadResource(String version, String name, File destination) throws MalformedURLException, IOException {
         String hash;
-        if ((hash = this.configuration.getString(name)) == null) {
+        if ((hash = this.configuration.getString(version + "." + name)) == null) {
             throw new IllegalArgumentException("Resource with name \"" + name + "\" does not exists!");
         }
         this.plugin.getLogger().log(Level.INFO, "Downloading {0}.lang (hash: {1})", new Object[]{name, hash});

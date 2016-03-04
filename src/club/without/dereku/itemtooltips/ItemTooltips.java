@@ -50,7 +50,7 @@ public class ItemTooltips extends JavaPlugin {
     public void onEnable() {
         this.saveDefaultConfig();
         this.language = this.getConfig().getString("lang", "en_US");
-        this.getLogger().info(this.getServer().getBukkitVersion());
+        
         if (this.getServer().getBukkitVersion().startsWith("1.8.8")) {
             this.impl = new v1_8_R3();
         } else if (this.getServer().getBukkitVersion().startsWith("1.9-R0.1")) {
@@ -87,7 +87,7 @@ public class ItemTooltips extends JavaPlugin {
             file.mkdir();
             try {
                 this.rd = new ResourceDownloader(this);
-                this.rd.downloadResource(version + "." + lang, file);
+                this.rd.downloadResource(version, lang, file);
             } catch (IOException | InvalidConfigurationException | IllegalArgumentException ex) {
                 this.getLogger().log(Level.WARNING, "Failed to download " + file.getName(), ex);
                 this.getLogger().log(Level.WARNING, "Using en_US language.");
