@@ -28,7 +28,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.logging.Level;
-import org.apache.commons.io.FileUtilsSmall;
+import org.apache.commons.io.FileUtils;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -61,7 +61,7 @@ public class ResourceDownloader {
             throw new IllegalArgumentException("Resource with name \"" + name + "\" does not exists!");
         }
         this.plugin.getLogger().log(Level.INFO, "Downloading {0}.lang (hash: {1})", new Object[]{name, hash});
-        FileUtilsSmall.copyURLToFile(new URL(ASSETS_URL + this.createPathFromHash(hash)), destination);
+        FileUtils.copyURLToFile(new URL(ASSETS_URL + this.createPathFromHash(hash)), destination);
     }
 
     /**
