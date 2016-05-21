@@ -57,8 +57,10 @@ public class ItemTooltips extends JavaPlugin {
             return;
         }
         
+        this.getLogger().log(Level.INFO, "Using implementation with version {0}", this.impl.getVersion());
+        
         if (!this.language.equals("en_US")) {
-            this.downloadAndApplyLanguage(this.impl.getVersion(), this.language);
+            this.downloadAndApplyLanguage(this.impl.getAssetsVersion(), this.language);
         }
 
         this.worlds = this.getConfig().getStringList("worlds");

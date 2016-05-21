@@ -24,6 +24,8 @@
 package club.without.dereku.itemtooltips.implementations;
 
 import java.util.Properties;
+import java.util.logging.Level;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Item;
 
 /**
@@ -38,6 +40,8 @@ public abstract class Implementation {
     
     public abstract String getVersion();
     
+    public abstract String getAssetsVersion();
+    
     public static Implementation getImpl(String version) {
         if (version.startsWith("1.8.8")) {
             return new v1_8_R3();
@@ -51,6 +55,7 @@ public abstract class Implementation {
                 return null;
             }
         }
+        Bukkit.getLogger().log(Level.WARNING, "Failed to parse \"{0}\"", version);
         return null;
     }
 }

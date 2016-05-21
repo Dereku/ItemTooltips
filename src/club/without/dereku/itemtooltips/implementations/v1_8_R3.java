@@ -37,7 +37,7 @@ public class v1_8_R3 extends Implementation {
     
     @Override
     public String getVersion() {
-        return "1.8";
+        return "1.8.7";
     }
 
     @Override
@@ -55,6 +55,11 @@ public class v1_8_R3 extends Implementation {
             out = nms.a() + ".name";
         }
         return this.keys.getProperty(out, out);
+    }
+
+    @Override
+    public String getAssetsVersion() {
+        return "1.8";
     }
     
 }

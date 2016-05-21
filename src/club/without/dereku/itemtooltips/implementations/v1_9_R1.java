@@ -56,5 +56,10 @@ public class v1_9_R1 extends Implementation{
     public String getVersion() {
         return "1.9";
     }
+
+    @Override
+    public String getAssetsVersion() {
+       return "1.9";
+    }
     
 }
