@@ -47,13 +47,15 @@ public abstract class Implementation {
             return new v1_8_R3();
         }
         if (version.startsWith("1.9")) {
-            if (version.contains("R1")) {
+            char subvc = version.charAt(4);
+            int subversion;
+            try {
+                subversion = Integer.parseInt(String.valueOf(subvc));
+            } catch (Exception ex) {
                 return new v1_9_R1();
-            } else if (version.contains("R2")) {
-                return new v1_9_R2();
-            } else {
-                return null;
             }
+            
+            return subversion < 4 ? new v1_9_R1() : new v1_9_R2();
         }
         Bukkit.getLogger().log(Level.WARNING, "Failed to parse \"{0}\"", version);
         return null;
