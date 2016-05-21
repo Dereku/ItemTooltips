@@ -44,19 +44,13 @@ public class Listeners implements Listener {
         this.plugin = aThis;
     }
     
-    @EventHandler
+    @EventHandler(ignoreCancelled=true)
     public void onItemSpawnEvent(ItemSpawnEvent event) {
-        if (event.isCancelled()) {
-            return;
-        }
         this.setName(event.getEntity(), event.getEntity().getItemStack());
     }
     
-    @EventHandler
+    @EventHandler(ignoreCancelled=true)
     public void onItemMergeEvent(ItemMergeEvent event) {
-        if (event.isCancelled()) {
-            return;
-        }
         ItemStack is = event.getEntity().getItemStack().clone();
         is.setAmount(is.getAmount() + event.getTarget().getItemStack().getAmount());
         this.setName(event.getTarget(), is);
@@ -67,19 +61,17 @@ public class Listeners implements Listener {
             return;
         }
         ItemMeta im = item.getItemStack().getItemMeta();
-        String name;
+        String name = this.plugin.getConfig().getString("format.withoutAmount", "%name%");
         if (itemStack.getAmount() > 1) {
             name = this.plugin.getConfig().getString("format.withAmount", "%name% x%amount%");
-        } else {
-            name = this.plugin.getConfig().getString("format.withoutAmount", "%name%");
         }
+        
+        String displayName = im.hasDisplayName() ? im.getDisplayName() : this.plugin.getImpl().getName(item);
         item.setCustomName(
                 ChatColor.translateAlternateColorCodes('&',
                         name
-                        .replace("%name%",
-                                im.hasDisplayName() ? im.getDisplayName() : this.plugin.getImpl().getName(item))
-                        .replace("%amount%",
-                                Integer.toString(itemStack.getAmount())))
+                        .replace("%name%", displayName)
+                        .replace("%amount%", Integer.toString(itemStack.getAmount())))
         );
         item.setCustomNameVisible(true);
     }
