@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2015 Dereku.
+ * Copyright 2016 Dereku.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,34 +23,38 @@
  */
 package club.without.dereku.itemtooltips.implementations;
 
-import java.util.Properties;
+import net.minecraft.server.v1_9_R2.ItemStack;
+import org.bukkit.Material;
+import org.bukkit.craftbukkit.v1_9_R2.inventory.CraftItemStack;
 import org.bukkit.entity.Item;
+import org.bukkit.inventory.meta.BannerMeta;
 
 /**
  *
  * @author Dereku
  */
-public abstract class Implementation {
-    
-    public final Properties keys = new Properties();
-    
-    public abstract String getName(Item item);
-    
-    public abstract String getVersion();
-    
-    public static Implementation getImpl(String version) {
-        if (version.startsWith("1.8.8")) {
-            return new v1_8_R3();
+public class v1_9_R2 extends Implementation {
+
+    @Override
+    public String getName(Item item) {
+        ItemStack nms = CraftItemStack.asNMSCopy(item.getItemStack());
+        if (this.keys.isEmpty()) {
+            return nms.getName();
         }
-        if (version.startsWith("1.9")) {
-            if (version.contains("R1")) {
-                return new v1_9_R1();
-            } else if (version.contains("R2")) {
-                return new v1_9_R2();
-            } else {
-                return null;
-            }
+        String out;
+        //Banners, why you are written so badly?
+        if (item.getItemStack().getType().equals(Material.BANNER)) {
+            BannerMeta bm = (BannerMeta) item.getItemStack().getItemMeta();
+            out = item.getName().replace("tile.", "") + "." + bm.getBaseColor().toString().toLowerCase().replace("light_blue", "lightBlue") + ".name";
+        } else {
+            out = nms.a() + ".name";
         }
-        return null;
+        return this.keys.getProperty(out, out);
     }
+
+    @Override
+    public String getVersion() {
+        return "1.9.4";
+    }
+    
 }
