@@ -24,31 +24,28 @@
 package club.without.dereku.itemtooltips.implementations;
 
 import net.minecraft.server.v1_9_R1.ItemStack;
-import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_9_R1.inventory.CraftItemStack;
 import org.bukkit.entity.Item;
-import org.bukkit.inventory.meta.BannerMeta;
 
 /**
  *
  * @author Dereku
  */
-public class v1_9_R1 extends Implementation{
+public class v1_9_R1 extends Implementation {
 
     @Override
     public String getName(Item item) {
         ItemStack nms = CraftItemStack.asNMSCopy(item.getItemStack());
+
         if (this.keys.isEmpty()) {
             return nms.getName();
         }
-        String out;
-        //Banners, why you are written so badly?
-        if (item.getItemStack().getType().equals(Material.BANNER)) {
-            BannerMeta bm = (BannerMeta) item.getItemStack().getItemMeta();
-            out = item.getName().replace("tile.", "") + "." + bm.getBaseColor().toString().toLowerCase().replace("light_blue", "lightBlue") + ".name";
-        } else {
-            out = nms.a() + ".name";
+
+        String out = this.getBannerKey(item);
+        if (out == null) {
+            out = nms.a().concat(".name");
         }
+
         return this.keys.getProperty(out, out);
     }
 
@@ -59,7 +56,7 @@ public class v1_9_R1 extends Implementation{
 
     @Override
     public String getAssetsVersion() {
-       return "1.9";
+        return "1.9";
     }
-    
+
 }

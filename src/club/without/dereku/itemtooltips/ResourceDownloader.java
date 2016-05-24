@@ -25,6 +25,7 @@ package club.without.dereku.itemtooltips;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.logging.Level;
@@ -45,11 +46,15 @@ public class ResourceDownloader {
 
     public ResourceDownloader(ItemTooltips plugin) throws IOException, InvalidConfigurationException {
         this.plugin = plugin;
-        this.configuration.load(plugin.getResource("hashs.yml")); //Deprecated? Are you serious?
+        //Try without catch/finally? Heh.
+        try (InputStreamReader isr = new InputStreamReader(plugin.getResource("hashs.yml"))) {
+            this.configuration.load(isr);
+        }
     }
 
     /**
-     * Download resources. Joke. This method will download only ".lang" files.
+     * Download locale file.
+     * @param version version of assets
      * @param name Name of resource. Ex.: ru_RU, en_CA, etc.
      * @param destination Destination where to store file.
      * @throws MalformedURLException
@@ -61,7 +66,7 @@ public class ResourceDownloader {
             throw new IllegalArgumentException("Resource with name \"" + name + "\" does not exists!");
         }
         this.plugin.getLogger().log(Level.INFO, "Downloading {0}.lang (hash: {1})", new Object[]{name, hash});
-        FileUtils.copyURLToFile(new URL(ASSETS_URL + this.createPathFromHash(hash)), destination);
+        FileUtils.copyURLToFile(new URL(ResourceDownloader.ASSETS_URL + this.createPathFromHash(hash)), destination);
     }
 
     /**

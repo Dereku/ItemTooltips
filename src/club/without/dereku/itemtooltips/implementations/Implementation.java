@@ -26,7 +26,9 @@ package club.without.dereku.itemtooltips.implementations;
 import java.util.Properties;
 import java.util.logging.Level;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.entity.Item;
+import org.bukkit.inventory.meta.BannerMeta;
 
 /**
  *
@@ -41,6 +43,20 @@ public abstract class Implementation {
     public abstract String getVersion();
     
     public abstract String getAssetsVersion();
+    
+    public String getBannerKey(Item item) {
+        if (!item.getItemStack().getType().equals(Material.BANNER)) {
+            return null;
+        }
+        StringBuilder out = new StringBuilder();
+        BannerMeta bm = (BannerMeta) item.getItemStack().getItemMeta();
+        out.append(item.getName().replace("tile.", ""))
+                .append(".")
+                .append(bm.getBaseColor().toString().toLowerCase().replace("light_blue", "lightBlue"))
+                .append(".name");
+        
+        return out.toString();
+    }
     
     public static Implementation getImpl(String version) {
         if (version.startsWith("1.8.8")) {
