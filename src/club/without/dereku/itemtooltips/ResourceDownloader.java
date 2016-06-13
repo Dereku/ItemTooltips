@@ -46,7 +46,6 @@ public class ResourceDownloader {
 
     public ResourceDownloader(ItemTooltips plugin) throws IOException, InvalidConfigurationException {
         this.plugin = plugin;
-        //Try without catch/finally? Heh.
         try (InputStreamReader isr = new InputStreamReader(plugin.getResource("hashs.yml"))) {
             this.configuration.load(isr);
         }

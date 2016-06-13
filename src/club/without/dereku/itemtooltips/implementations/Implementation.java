@@ -73,6 +73,9 @@ public abstract class Implementation {
             
             return subversion < 4 ? new v1_9_R1() : new v1_9_R2();
         }
+        if (version.startsWith("1.10")) {
+            return new v1_10_R1();
+        }
         Bukkit.getLogger().log(Level.WARNING, "Failed to parse \"{0}\"", version);
         return null;
     }
