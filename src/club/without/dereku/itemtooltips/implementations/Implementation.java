@@ -76,6 +76,9 @@ public abstract class Implementation {
         if (version.startsWith("1.10")) {
             return new v1_10_R1();
         }
+        if (version.startsWith("1.11")) {
+            return new v1_11_R1();
+        }
         Bukkit.getLogger().log(Level.WARNING, "Failed to parse \"{0}\"", version);
         return null;
     }
