@@ -50,11 +50,16 @@ public abstract class Implementation {
         }
         StringBuilder out = new StringBuilder();
         BannerMeta bm = (BannerMeta) item.getItemStack().getItemMeta();
+        System.out.println(item + ": " + item.getName() + ", " + bm);
+        System.out.println(bm.getBaseColor());
+        try {
         out.append(item.getName().replace("tile.", ""))
                 .append(".")
                 .append(bm.getBaseColor().toString().toLowerCase().replace("light_blue", "lightBlue"))
                 .append(".name");
-        
+        } catch (Exception ex) {
+            out.append(ex.getMessage());
+        }
         return out.toString();
     }
     
