@@ -23,15 +23,15 @@
  */
 package club.without.dereku.itemtooltips;
 
-import club.without.dereku.itemtooltips.implementations.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.List;
+import java.util.Properties;
 import java.util.logging.Level;
-import org.bukkit.World;
+import java.util.stream.Collectors;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -41,42 +41,43 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class ItemTooltips extends JavaPlugin {
 
+    public final Properties keys = new Properties();
     private String language;
     private ResourceDownloader rd;
-    private Implementation impl;
     public List<String> worlds;
 
     @Override
     public void onEnable() {
         this.saveDefaultConfig();
         this.language = this.getConfig().getString("lang", "en_US");
-        this.impl = Implementation.getImpl(this.getServer().getBukkitVersion());
-        if (this.impl == null) {
-            this.getLogger().info("Not implemented yet.");
+        
+        if (!this.language.equals("en_US")) {
+            //TODO
+            this.downloadAndApplyLanguage("", this.language);
+        }
+
+        this.worlds = this.getConfig().getStringList("worlds");
+        if (this.worlds.isEmpty()) {
+            this.worlds.addAll(
+                    this.getServer().getWorlds().stream()
+                            .map(w -> w.getName())
+                            .collect(Collectors.toList())
+            );
+            this.getConfig().set("worlds", this.worlds);
+            this.saveConfig();
+        }
+        
+        Listeners listeners;
+        try {
+            listeners = new Listeners(this);
+        } catch (ClassNotFoundException | SecurityException | NoSuchMethodException ex) {
+            this.getLogger().log(Level.SEVERE, "Failed to init listeners", ex);
             this.getPluginLoader().disablePlugin(this);
             return;
         }
         
-        this.getLogger().log(Level.INFO, "Using implementation with version {0}", this.impl.getVersion());
-        
-        if (!this.language.equals("en_US")) {
-            this.downloadAndApplyLanguage(this.impl.getAssetsVersion(), this.language);
-        }
-
-        this.worlds = this.getConfig().getStringList("worlds");
-        if (worlds.isEmpty()) {
-            for (World world : this.getServer().getWorlds()) {
-                worlds.add(world.getName());
-            }
-            this.getConfig().set("worlds", this.worlds);
-            this.saveConfig();
-        }
-        this.getServer().getPluginManager().registerEvents(new Listeners(this), this);
+        this.getServer().getPluginManager().registerEvents(listeners, this);
         this.getLogger().info("Enabled.");
-    }
-
-    public Implementation getImpl() {
-        return this.impl;
     }
 
     public void downloadAndApplyLanguage(String version, String lang) {
@@ -89,7 +90,7 @@ public class ItemTooltips extends JavaPlugin {
             } catch (IOException | InvalidConfigurationException | IllegalArgumentException ex) {
                 this.getLogger().log(Level.WARNING, "Failed to download " + file.getName(), ex);
                 this.getLogger().log(Level.WARNING, "Using en_US language.");
-                this.impl.keys.clear();
+                this.keys.clear();
                 return;
             }
         }
@@ -99,11 +100,11 @@ public class ItemTooltips extends JavaPlugin {
     public void loadLanguage(File file) {
         Charset charset = Charset.forName("UTF-8");
         try (InputStreamReader is = new InputStreamReader(new FileInputStream(file), charset)) {
-            this.impl.keys.load(is);
+            this.keys.load(is);
         } catch (IOException ex) {
             this.getLogger().log(Level.WARNING, "Failed to load " + file.getName(), ex);
             this.getLogger().log(Level.WARNING, "Using en_US language.");
-            this.impl.keys.clear();
+            this.keys.clear();
         }
     }
 }
