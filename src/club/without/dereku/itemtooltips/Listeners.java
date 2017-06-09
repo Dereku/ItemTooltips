@@ -25,7 +25,6 @@ package club.without.dereku.itemtooltips;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.logging.Level;
 import org.apache.commons.lang3.ClassUtils;
 import org.bukkit.ChatColor;
@@ -58,7 +57,7 @@ public class Listeners implements Listener {
     public Listeners(ItemTooltips aThis) throws ClassNotFoundException, SecurityException, NoSuchMethodException {
         this.plugin = aThis;
         this.withAmount = ChatColor.translateAlternateColorCodes('&',
-                this.plugin.getConfig().getString("format.withAmount", "%name%")
+                this.plugin.getConfig().getString("format.withAmount", "%name% x%amount%")
         );
         this.withoutAmount = ChatColor.translateAlternateColorCodes('&',
                 this.plugin.getConfig().getString("format.withoutAmount", "%name%")
@@ -68,7 +67,7 @@ public class Listeners implements Listener {
         String nmsVersion = pckg.substring(pckg.lastIndexOf('.') + 1);
         
         this.nmsItemStack = ClassUtils.getClass("net.minecraft.server." + nmsVersion + ".ItemStack");
-        this.obcbCraftItemStack = ClassUtils.getClass("org.bukkit.craftbukkit." + nmsVersion + ".CraftItemStack");
+        this.obcbCraftItemStack = ClassUtils.getClass("org.bukkit.craftbukkit." + nmsVersion + ".inventory.CraftItemStack");
         this.asNMSCopy = this.obcbCraftItemStack.getMethod("asNMSCopy", ItemStack.class);
         this.itemStack_getName = this.nmsItemStack.getDeclaredMethod("getName", (Class<?>[]) null);
         this.itemStack_getI18n = this.nmsItemStack.getDeclaredMethod("a", (Class<?>[]) null);
@@ -105,10 +104,10 @@ public class Listeners implements Listener {
         try {
             Object nmsis = this.asNMSCopy.invoke(null, item.getItemStack());
             if (this.plugin.keys.isEmpty()) {
-                return (String) this.itemStack_getName.invoke(nmsis, (Object) null);
+                return (String) this.itemStack_getName.invoke(nmsis, new Object[0]);
             }
-            i18n = (String) this.itemStack_getI18n.invoke(nmsis, (Object) null);
-        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+            i18n = (String) this.itemStack_getI18n.invoke(nmsis, new Object[0]);
+        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) { 
             this.plugin.getLogger().log(Level.WARNING, "Failed to get name", ex);
             return null;
         }
@@ -121,14 +120,13 @@ public class Listeners implements Listener {
         return this.plugin.keys.getProperty(out, out);
     }
 
-    public String getBannerKey(Item item) {
+    //TODO: Remove this shit
+    private String getBannerKey(Item item) {
         if (!item.getItemStack().getType().equals(Material.BANNER)) {
             return null;
         }
         StringBuilder out = new StringBuilder();
         BannerMeta bm = (BannerMeta) item.getItemStack().getItemMeta();
-        System.out.println(item + ": " + item.getName() + ", " + bm);
-        System.out.println(bm.getBaseColor());
         try {
             out.append(item.getName().replace("tile.", ""))
                     .append(".")

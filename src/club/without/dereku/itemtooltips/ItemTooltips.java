@@ -48,10 +48,9 @@ public class ItemTooltips extends JavaPlugin {
     @Override
     public void onEnable() {
         this.saveDefaultConfig();
-        this.language = this.getConfig().getString("lang", "en_US");
-        
-        if (!this.language.equals("en_US")) {
-            //TODO
+        this.language = this.getConfig().getString("lang", "en_us").toLowerCase();
+
+        if (!this.language.equals("en_us")) {
             this.downloadAndApplyLanguage(this.language);
         }
 
@@ -59,13 +58,13 @@ public class ItemTooltips extends JavaPlugin {
         if (this.worlds.isEmpty()) {
             this.worlds.addAll(
                     this.getServer().getWorlds().stream()
-                            .map(w -> w.getName())
-                            .collect(Collectors.toList())
+                    .map(w -> w.getName())
+                    .collect(Collectors.toList())
             );
             this.getConfig().set("worlds", this.worlds);
             this.saveConfig();
         }
-        
+
         Listeners listeners;
         try {
             listeners = new Listeners(this);
@@ -74,17 +73,18 @@ public class ItemTooltips extends JavaPlugin {
             this.getPluginLoader().disablePlugin(this);
             return;
         }
-        
+
         this.getServer().getPluginManager().registerEvents(listeners, this);
         this.getLogger().info("Enabled.");
     }
 
-    public void downloadAndApplyLanguage(String lang) {
+    private void downloadAndApplyLanguage(String lang) {
         File file = FileUtils.getFile(this.getDataFolder().toString(), "lang", lang + ".lang");
         if (!file.exists()) {
             file.getParentFile().mkdirs();
             try {
                 new ResourceDownloader(this).downloadResource(lang, file);
+                this.loadLanguage(file);
             } catch (IOException | IllegalArgumentException ex) {
                 this.getLogger().log(Level.WARNING, "Failed to download " + file.getName(), ex);
                 this.getLogger().log(Level.WARNING, "Using en_US language.");
@@ -95,9 +95,10 @@ public class ItemTooltips extends JavaPlugin {
         this.loadLanguage(file);
     }
 
-    public void loadLanguage(File file) {
+    private void loadLanguage(File file) {
         Charset charset = Charset.forName("UTF-8");
-        try (InputStreamReader is = new InputStreamReader(new FileInputStream(file), charset)) {
+        try (FileInputStream fis = new FileInputStream(file);
+                InputStreamReader is = new InputStreamReader(fis, charset)) {
             this.keys.load(is);
         } catch (IOException ex) {
             this.getLogger().log(Level.WARNING, "Failed to load " + file.getName(), ex);

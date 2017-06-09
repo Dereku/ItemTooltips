@@ -34,6 +34,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.lang.reflect.Type;
 import org.apache.commons.io.FileUtils;
 
 /**
@@ -52,7 +54,6 @@ public class ResourceDownloader {
     }
 
     /**
-     * Download locale file.
      *
      * @param locale Name of resource. Ex.: ru_RU, en_CA, etc.
      * @param destination Destination where to store file.
@@ -60,30 +61,20 @@ public class ResourceDownloader {
      * @throws IOException
      */
     public void downloadResource(String locale, File destination) throws MalformedURLException, IOException {
-        URL versionList = new URL(ResourceDownloader.VERSIONS_LIST);
-        
-        VersionManifest vm;
-        try (
-                InputStream inputStream = versionList.openConnection().getInputStream();
-                InputStreamReader r = new InputStreamReader(inputStream); 
-                JsonReader jr = new JsonReader(r)
-                ) {
-            vm = this.gson.fromJson(jr, VersionManifest.class); //I hope this will works
-        }
-        RemoteClient latestRelease = vm.getLatestRelease();
-        URL assetsUrl = new URL(latestRelease.getUrl());
-        
-        AssetIndex ai;
-        try (
-                InputStream inputStream = assetsUrl.openConnection().getInputStream();
-                InputStreamReader r = new InputStreamReader(inputStream); 
-                JsonReader jr = new JsonReader(r)
-                ) {
-            ai = this.gson.fromJson(jr, AssetIndex.class); //I hope this will works too
-        }
+        VersionManifest vm = this.downloadObject(new URL(ResourceDownloader.VERSIONS_LIST), VersionManifest.class);
+        ClientVersion client = this.downloadObject(new URL(vm.getLatestRelease().getUrl()), ClientVersion.class);
+        AssetIndex ai = this.downloadObject(new URL(client.getAssetUrl()), AssetIndex.class);
         String hash = ai.getLocaleHash(locale);
         this.plugin.getLogger().log(Level.INFO, "Downloading {0}.lang (hash: {1})", new Object[]{locale, hash});
         FileUtils.copyURLToFile(new URL(ResourceDownloader.ASSETS_URL + this.createPathFromHash(hash)), destination);
+    }
+
+    private <T extends Object> T downloadObject(URL url, Class<T> object) throws IOException {
+        try (InputStream inputStream = url.openConnection().getInputStream();
+                InputStreamReader r = new InputStreamReader(inputStream);
+                JsonReader jr = new JsonReader(r)) {
+            return this.gson.fromJson(jr, object);
+        }
     }
 
     /**
