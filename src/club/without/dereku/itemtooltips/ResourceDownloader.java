@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2015 Dereku.
+ * Copyright 2017 Dereku.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,8 +34,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.lang.reflect.Type;
 import org.apache.commons.io.FileUtils;
 
 /**
