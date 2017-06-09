@@ -90,8 +90,9 @@ public class ResourceDownloader {
      */
     class VersionManifest {
 
-        LinkedTreeMap<String, String> latest;
-        ArrayList<RemoteClient> versions;
+        @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
+        private LinkedTreeMap<String, String> latest;
+        private ArrayList<RemoteClient> versions;
 
         public RemoteClient getLatestRelease() {
             String release = this.latest.get("release");
@@ -107,8 +108,8 @@ public class ResourceDownloader {
 
     class RemoteClient {
 
-        String id, url;
-        Object type, time, releaseTime;
+        private String id, url;
+        private Object type, time, releaseTime;
 
         public String getId() {
             return id;
@@ -121,10 +122,11 @@ public class ResourceDownloader {
 
     class ClientVersion {
 
-        LinkedTreeMap<String, String> assetIndex;
-        Object assets, downloads, id, libraries, logging, mainClass;
-        Object minecraftArguments, minimumLauncherVersion, releaseTime;
-        Object time, type;
+        @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
+        private LinkedTreeMap<String, String> assetIndex;
+        private Object assets, downloads, id, libraries, logging, mainClass;
+        private Object minecraftArguments, minimumLauncherVersion, releaseTime;
+        private Object time, type;
 
         public String getAssetUrl() {
             return this.assetIndex.get("url");
@@ -134,7 +136,8 @@ public class ResourceDownloader {
     class AssetIndex {
 
         private final static String PATH = "minecraft/lang/%s.lang";
-        LinkedTreeMap<String, LinkedTreeMap<String, String>> objects;
+        @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
+        private LinkedTreeMap<String, LinkedTreeMap<String, String>> objects;
 
         public String getLocaleHash(String locale) {
             LinkedTreeMap<String, String> asset

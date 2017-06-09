@@ -42,16 +42,15 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class ItemTooltips extends JavaPlugin {
 
     public final Properties keys = new Properties();
-    private String language;
     public List<String> worlds;
 
     @Override
     public void onEnable() {
         this.saveDefaultConfig();
-        this.language = this.getConfig().getString("lang", "en_us").toLowerCase();
+        String language = this.getConfig().getString("lang", "en_us").toLowerCase();
 
-        if (!this.language.equals("en_us")) {
-            this.downloadAndApplyLanguage(this.language);
+        if (!language.equals("en_us")) {
+            this.downloadAndApplyLanguage(language);
         }
 
         this.worlds = this.getConfig().getStringList("worlds");

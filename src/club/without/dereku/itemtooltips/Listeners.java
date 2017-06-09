@@ -47,9 +47,7 @@ public class Listeners implements Listener {
     private final ItemTooltips plugin;
     private final String withoutAmount;
     private final String withAmount;
-
-    private final Class<?> obcbCraftItemStack;
-    private final Class<?> nmsItemStack;
+    
     private final Method asNMSCopy;
     private final Method itemStack_getName;
     private final Method itemStack_getI18n;
@@ -66,11 +64,11 @@ public class Listeners implements Listener {
         String pckg = aThis.getServer().getClass().getPackage().getName();
         String nmsVersion = pckg.substring(pckg.lastIndexOf('.') + 1);
         
-        this.nmsItemStack = ClassUtils.getClass("net.minecraft.server." + nmsVersion + ".ItemStack");
-        this.obcbCraftItemStack = ClassUtils.getClass("org.bukkit.craftbukkit." + nmsVersion + ".inventory.CraftItemStack");
-        this.asNMSCopy = this.obcbCraftItemStack.getMethod("asNMSCopy", ItemStack.class);
-        this.itemStack_getName = this.nmsItemStack.getDeclaredMethod("getName", (Class<?>[]) null);
-        this.itemStack_getI18n = this.nmsItemStack.getDeclaredMethod("a", (Class<?>[]) null);
+        Class<?> nmsItemStack = ClassUtils.getClass("net.minecraft.server." + nmsVersion + ".ItemStack");
+        Class<?> obcbCraftItemStack = ClassUtils.getClass("org.bukkit.craftbukkit." + nmsVersion + ".inventory.CraftItemStack");
+        this.asNMSCopy = obcbCraftItemStack.getMethod("asNMSCopy", ItemStack.class);
+        this.itemStack_getName = nmsItemStack.getDeclaredMethod("getName", (Class<?>[]) null);
+        this.itemStack_getI18n = nmsItemStack.getDeclaredMethod("a", (Class<?>[]) null);
     }
 
     @EventHandler(ignoreCancelled = true)
