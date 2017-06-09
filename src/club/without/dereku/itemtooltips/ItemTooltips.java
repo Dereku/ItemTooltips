@@ -49,7 +49,7 @@ public class ItemTooltips extends JavaPlugin {
         this.saveDefaultConfig();
         String language = this.getConfig().getString("lang", "en_us").toLowerCase();
 
-        if (!language.equals("en_us")) {
+        if (!"en_us".equals(language)) {
             this.downloadAndApplyLanguage(language);
         }
 

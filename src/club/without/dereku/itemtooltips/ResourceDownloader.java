@@ -109,7 +109,6 @@ public class ResourceDownloader {
     class RemoteClient {
 
         private String id, url;
-        private Object type, time, releaseTime;
 
         public String getId() {
             return id;
@@ -124,9 +123,6 @@ public class ResourceDownloader {
 
         @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
         private LinkedTreeMap<String, String> assetIndex;
-        private Object assets, downloads, id, libraries, logging, mainClass;
-        private Object minecraftArguments, minimumLauncherVersion, releaseTime;
-        private Object time, type;
 
         public String getAssetUrl() {
             return this.assetIndex.get("url");
