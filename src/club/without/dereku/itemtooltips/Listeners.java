@@ -64,15 +64,9 @@ public class Listeners implements Listener {
                 this.plugin.getConfig().getString("format.withoutAmount", "%name%")
         );
 
-        String pckg = Arrays.stream(Package.getPackages())
-                .filter(pk -> pk.getName().startsWith("net.minecraft.server"))
-                .map(pk -> pk.getName()).findFirst().orElse(null);
-
-        if (pckg == null) {
-            throw new RuntimeException("Failed to recognize nms version.");
-        }
-
-        String nmsVersion = pckg.substring(21);
+        String pckg = aThis.getServer().getClass().getPackage().getName();
+        String nmsVersion = pckg.substring(pckg.lastIndexOf('.') + 1);
+        
         this.nmsItemStack = ClassUtils.getClass("net.minecraft.server." + nmsVersion + ".ItemStack");
         this.obcbCraftItemStack = ClassUtils.getClass("org.bukkit.craftbukkit." + nmsVersion + ".CraftItemStack");
         this.asNMSCopy = this.obcbCraftItemStack.getMethod("asNMSCopy", ItemStack.class);

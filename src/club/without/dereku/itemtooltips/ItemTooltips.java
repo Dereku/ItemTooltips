@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
-import org.bukkit.configuration.InvalidConfigurationException;
+import org.apache.commons.io.FileUtils;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
@@ -43,7 +43,6 @@ public class ItemTooltips extends JavaPlugin {
 
     public final Properties keys = new Properties();
     private String language;
-    private ResourceDownloader rd;
     public List<String> worlds;
 
     @Override
@@ -53,7 +52,7 @@ public class ItemTooltips extends JavaPlugin {
         
         if (!this.language.equals("en_US")) {
             //TODO
-            this.downloadAndApplyLanguage("", this.language);
+            this.downloadAndApplyLanguage(this.language);
         }
 
         this.worlds = this.getConfig().getStringList("worlds");
@@ -80,14 +79,13 @@ public class ItemTooltips extends JavaPlugin {
         this.getLogger().info("Enabled.");
     }
 
-    public void downloadAndApplyLanguage(String version, String lang) {
-        File file = new File(this.getDataFolder().toString() + File.separator + "lang" + File.separator + version, lang + ".lang");
+    public void downloadAndApplyLanguage(String lang) {
+        File file = FileUtils.getFile(this.getDataFolder().toString(), "lang", lang + ".lang");
         if (!file.exists()) {
-            file.mkdir();
+            file.getParentFile().mkdirs();
             try {
-                this.rd = new ResourceDownloader(this);
-                this.rd.downloadResource(version, lang, file);
-            } catch (IOException | InvalidConfigurationException | IllegalArgumentException ex) {
+                new ResourceDownloader(this).downloadResource(lang, file);
+            } catch (IOException | IllegalArgumentException ex) {
                 this.getLogger().log(Level.WARNING, "Failed to download " + file.getName(), ex);
                 this.getLogger().log(Level.WARNING, "Using en_US language.");
                 this.keys.clear();

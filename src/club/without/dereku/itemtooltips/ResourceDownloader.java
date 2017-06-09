@@ -23,16 +23,18 @@
  */
 package club.without.dereku.itemtooltips;
 
+import com.google.gson.Gson;
+import com.google.gson.internal.LinkedTreeMap;
+import com.google.gson.stream.JsonReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import org.apache.commons.io.FileUtils;
-import org.bukkit.configuration.InvalidConfigurationException;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 
 /**
  *
@@ -40,40 +42,118 @@ import org.bukkit.configuration.file.YamlConfiguration;
  */
 public class ResourceDownloader {
 
+    private final static String VERSIONS_LIST = "https://launchermeta.mojang.com/mc/game/version_manifest.json";
     private final static String ASSETS_URL = "http://resources.download.minecraft.net/";
+    private final Gson gson = new Gson();
     private final ItemTooltips plugin;
-    private final FileConfiguration configuration = new YamlConfiguration();
 
-    public ResourceDownloader(ItemTooltips plugin) throws IOException, InvalidConfigurationException {
+    public ResourceDownloader(ItemTooltips plugin) {
         this.plugin = plugin;
-        try (InputStreamReader isr = new InputStreamReader(plugin.getResource("hashs.yml"))) {
-            this.configuration.load(isr);
-        }
     }
 
     /**
      * Download locale file.
-     * @param version version of assets
-     * @param name Name of resource. Ex.: ru_RU, en_CA, etc.
+     *
+     * @param locale Name of resource. Ex.: ru_RU, en_CA, etc.
      * @param destination Destination where to store file.
      * @throws MalformedURLException
-     * @throws IOException 
+     * @throws IOException
      */
-    public void downloadResource(String version, String name, File destination) throws MalformedURLException, IOException {
-        String hash;
-        if ((hash = this.configuration.getString(version + "." + name)) == null) {
-            throw new IllegalArgumentException("Resource with name \"" + name + "\" does not exists!");
+    public void downloadResource(String locale, File destination) throws MalformedURLException, IOException {
+        URL versionList = new URL(ResourceDownloader.VERSIONS_LIST);
+        
+        VersionManifest vm;
+        try (
+                InputStream inputStream = versionList.openConnection().getInputStream();
+                InputStreamReader r = new InputStreamReader(inputStream); 
+                JsonReader jr = new JsonReader(r)
+                ) {
+            vm = this.gson.fromJson(jr, VersionManifest.class); //I hope this will works
         }
-        this.plugin.getLogger().log(Level.INFO, "Downloading {0}.lang (hash: {1})", new Object[]{name, hash});
+        RemoteClient latestRelease = vm.getLatestRelease();
+        URL assetsUrl = new URL(latestRelease.getUrl());
+        
+        AssetIndex ai;
+        try (
+                InputStream inputStream = assetsUrl.openConnection().getInputStream();
+                InputStreamReader r = new InputStreamReader(inputStream); 
+                JsonReader jr = new JsonReader(r)
+                ) {
+            ai = this.gson.fromJson(jr, AssetIndex.class); //I hope this will works too
+        }
+        String hash = ai.getLocaleHash(locale);
+        this.plugin.getLogger().log(Level.INFO, "Downloading {0}.lang (hash: {1})", new Object[]{locale, hash});
         FileUtils.copyURLToFile(new URL(ResourceDownloader.ASSETS_URL + this.createPathFromHash(hash)), destination);
     }
 
     /**
-     * From Mojang, with love. 
+     * From Mojang, with love.
+     *
      * @param hash
-     * @return 
+     * @return
      */
     private String createPathFromHash(String hash) {
         return hash.substring(0, 2) + "/" + hash;
+    }
+
+    /*
+        Gson serialization
+     */
+    class VersionManifest {
+
+        LinkedTreeMap<String, String> latest;
+        ArrayList<RemoteClient> versions;
+
+        public RemoteClient getLatestRelease() {
+            String release = this.latest.get("release");
+            for (RemoteClient c : this.versions) {
+                if (c.getId().equals(release)) {
+                    return c;
+                }
+            }
+
+            throw new IllegalArgumentException(release + " does not exists. There something is definitely wrong.");
+        }
+    }
+
+    class RemoteClient {
+
+        String id, url;
+        Object type, time, releaseTime;
+
+        public String getId() {
+            return id;
+        }
+
+        public String getUrl() {
+            return url;
+        }
+    }
+
+    class ClientVersion {
+
+        LinkedTreeMap<String, String> assetIndex;
+        Object assets, downloads, id, libraries, logging, mainClass;
+        Object minecraftArguments, minimumLauncherVersion, releaseTime;
+        Object time, type;
+
+        public String getAssetUrl() {
+            return this.assetIndex.get("url");
+        }
+    }
+
+    class AssetIndex {
+
+        private final static String PATH = "minecraft/lang/%s.lang";
+        LinkedTreeMap<String, LinkedTreeMap<String, String>> objects;
+
+        public String getLocaleHash(String locale) {
+            LinkedTreeMap<String, String> asset
+                    = this.objects.get(String.format(PATH, locale.toLowerCase()));
+            if (asset == null) {
+                throw new IllegalArgumentException("Locale " + locale + " does not exists!");
+            }
+            return asset.get("hash");
+        }
     }
 }
