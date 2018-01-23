@@ -1,5 +1,0 @@
-lang: en_us
-format:
-    withAmount: "%name% &7[x%amount%]"
-    withoutAmount: "%name%"
-worlds: {}
